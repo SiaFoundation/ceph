@@ -7,7 +7,7 @@ usage: fix_markers.py BASE_REF FORK_REF UPSTREAM_REF [--write] [--keep NAME:MARK
 
 BASE_REF is the upstream commit the fork last merged, FORK_REF the fork before
 the merge and UPSTREAM_REF the upstream commit being merged. Run it from the
-repository root with the merge result in the working tree; see s3d/README.md.
+repository root with the merge result in the working tree.
 """
 import re
 import subprocess
