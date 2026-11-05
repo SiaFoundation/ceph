@@ -1094,6 +1094,7 @@ def parseXmlToJson(xml):
 
 @pytest.mark.fails_on_aws
 @pytest.mark.fails_on_dbstore
+@pytest.mark.s3d_unsupported
 def test_account_usage():
     # boto3.set_stream_logger(name='botocore')
     client = get_client()
@@ -1114,6 +1115,7 @@ def test_account_usage():
 
 @pytest.mark.fails_on_aws
 @pytest.mark.fails_on_dbstore
+@pytest.mark.s3d_unsupported
 def test_head_bucket_usage():
     client = get_client()
     bucket_name = _create_objects(keys=['foo'])
@@ -1131,6 +1133,7 @@ def test_head_bucket_usage():
 
 @pytest.mark.fails_on_aws
 @pytest.mark.fails_on_dbstore
+@pytest.mark.s3d_unsupported
 def test_head_bucket_usage_multipart_incomplete():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -1165,6 +1168,7 @@ def test_head_bucket_usage_multipart_incomplete():
 
 @pytest.mark.fails_on_aws
 @pytest.mark.fails_on_dbstore
+@pytest.mark.s3d_unsupported
 def test_bucket_list_unordered():
     # boto3.set_stream_logger(name='botocore')
     keys_in = ['ado', 'bot', 'cob', 'dog', 'emu', 'fez', 'gnu', 'hex',
@@ -1219,6 +1223,7 @@ def test_bucket_list_unordered():
 @pytest.mark.fails_on_aws
 @pytest.mark.list_objects_v2
 @pytest.mark.fails_on_dbstore
+@pytest.mark.s3d_unsupported
 def test_bucket_listv2_unordered():
     # boto3.set_stream_logger(name='botocore')
     keys_in = ['ado', 'bot', 'cob', 'dog', 'emu', 'fez', 'gnu', 'hex',
@@ -1273,6 +1278,7 @@ def test_bucket_listv2_unordered():
 
 @pytest.mark.fails_on_aws
 @pytest.mark.fails_on_dbstore
+@pytest.mark.s3d_unsupported
 def test_bucket_list_unordered_policy_reject():
     client = get_client()
     bucket_name = get_new_bucket(client)
@@ -1307,6 +1313,7 @@ def test_bucket_list_unordered_policy_reject():
 
 @pytest.mark.fails_on_aws
 @pytest.mark.fails_on_dbstore
+@pytest.mark.s3d_unsupported
 def test_bucket_list_unordered_policy_require():
     client = get_client()
     bucket_name = get_new_bucket(client)
@@ -1500,6 +1507,7 @@ def _compare_dates(datetime1, datetime2):
     assert datetime1 == datetime2
 
 @pytest.mark.fails_on_dbstore
+@pytest.mark.s3d_unsupported
 def test_bucket_list_return_data():
     key_names = ['bar', 'baz', 'foo']
     bucket_name = _create_objects(keys=key_names)
@@ -1570,6 +1578,7 @@ def test_bucket_list_return_data_versioning():
         assert obj['IsLatest'] == True
         _compare_dates(obj['LastModified'],key_data['LastModified'])
 
+@pytest.mark.s3d_unsupported
 def test_bucket_list_objects_anonymous():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -1579,6 +1588,7 @@ def test_bucket_list_objects_anonymous():
     unauthenticated_client.list_objects(Bucket=bucket_name)
 
 @pytest.mark.list_objects_v2
+@pytest.mark.s3d_unsupported
 def test_bucket_listv2_objects_anonymous():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -1699,6 +1709,7 @@ def test_object_write_to_nonexist_bucket():
 def _ev_add_te_header(request, **kwargs):
     request.headers.add_header('Transfer-Encoding', 'chunked')
 
+@pytest.mark.s3d_unsupported
 def test_object_write_with_chunked_transfer_encoding():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -1737,6 +1748,7 @@ def get_http_response(**kwargs):
     http_response = kwargs['http_response'].__dict__
 
 @pytest.mark.fails_on_dbstore
+@pytest.mark.s3d_unsupported
 def test_object_requestid_matches_header_on_error():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -1822,6 +1834,7 @@ def test_multi_object_delete():
     assert 'Contents' not in response
 
 @pytest.mark.list_objects_v2
+@pytest.mark.s3d_unsupported
 def test_expected_bucket_owner():
   bucket_name = get_new_bucket()
   client = get_client()
@@ -1993,6 +2006,7 @@ def test_object_set_get_metadata_overwrite_to_empty():
 
 # TODO: the decoding of this unicode metadata is not happening properly for unknown reasons
 @pytest.mark.fails_on_rgw
+@pytest.mark.s3d_unsupported
 def test_object_set_get_unicode_metadata():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -3400,6 +3414,7 @@ def _setup_bucket_acl(bucket_acl=None):
 
     return bucket_name
 
+@pytest.mark.s3d_unsupported
 def test_object_raw_get():
     bucket_name = _setup_bucket_object_acl('public-read', 'public-read')
 
@@ -3407,6 +3422,7 @@ def test_object_raw_get():
     response = unauthenticated_client.get_object(Bucket=bucket_name, Key='foo')
     assert response['ResponseMetadata']['HTTPStatusCode'] == 200
 
+@pytest.mark.s3d_unsupported
 def test_object_raw_get_bucket_gone():
     bucket_name = _setup_bucket_object_acl('public-read', 'public-read')
     client = get_client()
@@ -3421,6 +3437,7 @@ def test_object_raw_get_bucket_gone():
     assert status == 404
     assert error_code == 'NoSuchBucket'
 
+@pytest.mark.s3d_unsupported
 def test_object_delete_key_bucket_gone():
     bucket_name = _setup_bucket_object_acl('public-read', 'public-read')
     client = get_client()
@@ -3435,6 +3452,7 @@ def test_object_delete_key_bucket_gone():
     assert status == 404
     assert error_code == 'NoSuchBucket'
 
+@pytest.mark.s3d_unsupported
 def test_object_raw_get_object_gone():
     bucket_name = _setup_bucket_object_acl('public-read', 'public-read')
     client = get_client()
@@ -3470,6 +3488,7 @@ def test_bucket_head_notexist():
 
 @pytest.mark.fails_on_aws
 @pytest.mark.fails_on_dbstore
+@pytest.mark.s3d_unsupported
 def test_bucket_head_extended():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -3549,6 +3568,7 @@ def test_object_raw_authenticated():
     response = client.get_object(Bucket=bucket_name, Key='foo')
     assert response['ResponseMetadata']['HTTPStatusCode'] == 200
 
+@pytest.mark.s3d_unsupported
 def test_object_raw_response_headers():
     bucket_name = _setup_bucket_object_acl('private', 'private')
 
@@ -3611,9 +3631,11 @@ def _test_object_raw_get_x_amz_expires_not_expired(client):
     res = requests.get(url, verify=get_config_ssl_verify()).__dict__
     assert res['status_code'] == 200
 
+@pytest.mark.s3d_unsupported
 def test_object_raw_get_x_amz_expires_not_expired():
     _test_object_raw_get_x_amz_expires_not_expired(client=get_client())
 
+@pytest.mark.s3d_unsupported
 def test_object_raw_get_x_amz_expires_not_expired_tenant():
     _test_object_raw_get_x_amz_expires_not_expired(client=get_tenant_client())
 
@@ -3627,6 +3649,7 @@ def test_object_raw_get_x_amz_expires_out_range_zero():
     res = requests.get(url, verify=get_config_ssl_verify()).__dict__
     assert res['status_code'] == 403
 
+@pytest.mark.s3d_unsupported
 def test_object_raw_get_x_amz_expires_out_max_range():
     bucket_name = _setup_bucket_object_acl('public-read', 'public-read')
     client = get_client()
@@ -3689,6 +3712,7 @@ def test_object_anon_put():
     assert status == 403
     assert error_code == 'AccessDenied'
 
+@pytest.mark.s3d_unsupported
 def test_object_anon_put_write_access():
     bucket_name = _setup_bucket_acl('public-read-write')
     client = get_client()
@@ -3952,10 +3976,11 @@ def test_bucket_create_exists():
         response = client.create_bucket(Bucket=bucket_name)
     except ClientError as e:
         status, error_code = _get_status_and_error_code(e.response)
-        assert e.status == 409
-        assert e.error_code == 'BucketAlreadyOwnedByYou'
+        assert status == 409
+        assert error_code == 'BucketAlreadyOwnedByYou'
 
 @pytest.mark.fails_on_dbstore
+@pytest.mark.s3d_unsupported
 def test_bucket_get_location():
     location_constraint = get_main_api_name()
     if not location_constraint:
@@ -5191,6 +5216,7 @@ def list_bucket_versions(client, bucket_name):
 
     return result
 
+@pytest.mark.s3d_unsupported
 def test_access_bucket_private_object_private():
     # all the test_access_* tests follow this template
     bucket_name, key1, key2, newkey = _setup_access(bucket_acl='private', object_acl='private')
@@ -5219,6 +5245,7 @@ def test_access_bucket_private_object_private():
     check_access_denied(alt_client3.put_object, Bucket=bucket_name, Key=newkey, Body='newcontent')
 
 @pytest.mark.list_objects_v2
+@pytest.mark.s3d_unsupported
 def test_access_bucket_private_objectv2_private():
     # all the test_access_* tests follow this template
     bucket_name, key1, key2, newkey = _setup_access(bucket_acl='private', object_acl='private')
@@ -5246,6 +5273,7 @@ def test_access_bucket_private_objectv2_private():
     alt_client3 = get_alt_client()
     check_access_denied(alt_client3.put_object, Bucket=bucket_name, Key=newkey, Body='newcontent')
 
+@pytest.mark.s3d_unsupported
 def test_access_bucket_private_object_publicread():
 
     bucket_name, key1, key2, newkey = _setup_access(bucket_acl='private', object_acl='public-read')
@@ -5267,6 +5295,7 @@ def test_access_bucket_private_object_publicread():
     check_access_denied(alt_client3.put_object, Bucket=bucket_name, Key=newkey, Body='newcontent')
 
 @pytest.mark.list_objects_v2
+@pytest.mark.s3d_unsupported
 def test_access_bucket_private_objectv2_publicread():
 
     bucket_name, key1, key2, newkey = _setup_access(bucket_acl='private', object_acl='public-read')
@@ -5287,6 +5316,7 @@ def test_access_bucket_private_objectv2_publicread():
     check_access_denied(alt_client3.list_objects_v2, Bucket=bucket_name)
     check_access_denied(alt_client3.put_object, Bucket=bucket_name, Key=newkey, Body='newcontent')
 
+@pytest.mark.s3d_unsupported
 def test_access_bucket_private_object_publicreadwrite():
     bucket_name, key1, key2, newkey = _setup_access(bucket_acl='private', object_acl='public-read-write')
     alt_client = get_alt_client()
@@ -5308,6 +5338,7 @@ def test_access_bucket_private_object_publicreadwrite():
     check_access_denied(alt_client3.put_object, Bucket=bucket_name, Key=newkey, Body='newcontent')
 
 @pytest.mark.list_objects_v2
+@pytest.mark.s3d_unsupported
 def test_access_bucket_private_objectv2_publicreadwrite():
     bucket_name, key1, key2, newkey = _setup_access(bucket_acl='private', object_acl='public-read-write')
     alt_client = get_alt_client()
@@ -5328,6 +5359,7 @@ def test_access_bucket_private_objectv2_publicreadwrite():
     check_access_denied(alt_client3.list_objects_v2, Bucket=bucket_name)
     check_access_denied(alt_client3.put_object, Bucket=bucket_name, Key=newkey, Body='newcontent')
 
+@pytest.mark.s3d_unsupported
 def test_access_bucket_publicread_object_private():
     bucket_name, key1, key2, newkey = _setup_access(bucket_acl='public-read', object_acl='private')
     alt_client = get_alt_client()
@@ -5347,6 +5379,7 @@ def test_access_bucket_publicread_object_private():
     assert objs == ['bar', 'foo']
     check_access_denied(alt_client3.put_object, Bucket=bucket_name, Key=newkey, Body='newcontent')
 
+@pytest.mark.s3d_unsupported
 def test_access_bucket_publicread_object_publicread():
     bucket_name, key1, key2, newkey = _setup_access(bucket_acl='public-read', object_acl='public-read')
     alt_client = get_alt_client()
@@ -5371,6 +5404,7 @@ def test_access_bucket_publicread_object_publicread():
     check_access_denied(alt_client3.put_object, Bucket=bucket_name, Key=newkey, Body='newcontent')
 
 
+@pytest.mark.s3d_unsupported
 def test_access_bucket_publicread_object_publicreadwrite():
     bucket_name, key1, key2, newkey = _setup_access(bucket_acl='public-read', object_acl='public-read-write')
     alt_client = get_alt_client()
@@ -5397,6 +5431,7 @@ def test_access_bucket_publicread_object_publicreadwrite():
     check_access_denied(alt_client3.put_object, Bucket=bucket_name, Key=newkey, Body='newcontent')
 
 
+@pytest.mark.s3d_unsupported
 def test_access_bucket_publicreadwrite_object_private():
     bucket_name, key1, key2, newkey = _setup_access(bucket_acl='public-read-write', object_acl='private')
     alt_client = get_alt_client()
@@ -5412,6 +5447,7 @@ def test_access_bucket_publicreadwrite_object_private():
     assert objs == ['bar', 'foo']
     alt_client.put_object(Bucket=bucket_name, Key=newkey, Body='newcontent')
 
+@pytest.mark.s3d_unsupported
 def test_access_bucket_publicreadwrite_object_publicread():
     bucket_name, key1, key2, newkey = _setup_access(bucket_acl='public-read-write', object_acl='public-read')
     alt_client = get_alt_client()
@@ -5430,6 +5466,7 @@ def test_access_bucket_publicreadwrite_object_publicread():
     assert objs == ['bar', 'foo']
     alt_client.put_object(Bucket=bucket_name, Key=newkey, Body='newcontent')
 
+@pytest.mark.s3d_unsupported
 def test_access_bucket_publicreadwrite_object_publicreadwrite():
     bucket_name, key1, key2, newkey = _setup_access(bucket_acl='public-read-write', object_acl='public-read-write')
     alt_client = get_alt_client()
@@ -5483,6 +5520,7 @@ def test_buckets_list_ctime():
             assert before <= ctime, '%r > %r' % (before, ctime)
 
 @pytest.mark.fails_on_aws
+@pytest.mark.s3d_unsupported
 def test_list_buckets_anonymous():
     # Get a connection with bad authorization, then change it to be our new Anonymous auth mechanism,
     # emulating standard HTTP access.
@@ -5507,6 +5545,7 @@ def test_list_buckets_bad_auth():
     assert status == 403
 
 @pytest.mark.fails_on_dbstore
+@pytest.mark.s3d_unsupported
 def test_list_buckets_paginated():
     client = get_client()
 
@@ -5575,6 +5614,7 @@ def test_bucket_recreate_not_overriding():
     assert key_names == objs_list
 
 @pytest.mark.fails_on_dbstore
+@pytest.mark.s3d_unsupported
 def test_bucket_create_special_key_names():
     key_names = [
         ' ',
@@ -5731,6 +5771,7 @@ def test_object_copy_not_owned_bucket():
     status, error_code = _get_status_and_error_code(e.response)
     assert status == 403
 
+@pytest.mark.s3d_unsupported
 def test_object_copy_not_owned_object_bucket():
     client = get_client()
     alt_client = get_alt_client()
@@ -5753,6 +5794,7 @@ def test_object_copy_not_owned_object_bucket():
     alt_client.copy(copy_source, bucket_name, 'bar321foo')
 
 @pytest.mark.fails_on_dbstore
+@pytest.mark.s3d_unsupported
 def test_object_copy_canned_acl():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -6230,8 +6272,8 @@ def test_multipart_upload_small():
     response = client.complete_multipart_upload(Bucket=bucket_name, Key=key1, UploadId=upload_id, MultipartUpload={'Parts': parts})
     response = client.get_object(Bucket=bucket_name, Key=key1)
     assert response['ContentLength'] == objlen
-    # check extra client.complete_multipart_upload
-    response = client.complete_multipart_upload(Bucket=bucket_name, Key=key1, UploadId=upload_id, MultipartUpload={'Parts': parts})
+    # check extra client.complete_multipart_upload (disabled - we do not support idempotent complete)
+    # response = client.complete_multipart_upload(Bucket=bucket_name, Key=key1, UploadId=upload_id, MultipartUpload={'Parts': parts})
 
 def _create_key_with_random_content(keyname, size=7*1024*1024, bucket_name=None, client=None):
     if bucket_name is None:
@@ -6431,8 +6473,8 @@ def test_multipart_upload():
 
     (upload_id, data, parts) = _multipart_upload(bucket_name=bucket_name, key=key, size=objlen, content_type=content_type, metadata=metadata)
     client.complete_multipart_upload(Bucket=bucket_name, Key=key, UploadId=upload_id, MultipartUpload={'Parts': parts})
-    # check extra client.complete_multipart_upload
-    client.complete_multipart_upload(Bucket=bucket_name, Key=key, UploadId=upload_id, MultipartUpload={'Parts': parts})
+    # check extra client.complete_multipart_upload (disabled - we do not support idempotent complete)
+    # client.complete_multipart_upload(Bucket=bucket_name, Key=key, UploadId=upload_id, MultipartUpload={'Parts': parts})
 
     response = client.list_objects_v2(Bucket=bucket_name, Prefix=key)
     assert len(response['Contents']) == 1
@@ -6736,6 +6778,7 @@ def test_list_multipart_upload():
     client.abort_multipart_upload(Bucket=bucket_name, Key=key2, UploadId=upload_id3)
 
 @pytest.mark.fails_on_dbstore
+@pytest.mark.s3d_unsupported
 def test_list_multipart_upload_owner():
     bucket_name = get_new_bucket()
 
@@ -7096,6 +7139,7 @@ def _simple_http_req_100_cont(host, port, is_secure, method, resource):
 
     return l[1]
 
+@pytest.mark.s3d_unsupported
 def test_100_continue():
     bucket_name = get_new_bucket_name()
     client = get_client()
@@ -11849,6 +11893,7 @@ def test_encryption_sse_c_unaligned_multipart_upload():
 @pytest.mark.encryption
 # TODO: remove this fails_on_rgw when I fix it
 @pytest.mark.fails_on_rgw
+@pytest.mark.s3d_unsupported
 def test_encryption_sse_c_multipart_invalid_chunks_1():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -11877,6 +11922,7 @@ def test_encryption_sse_c_multipart_invalid_chunks_1():
 @pytest.mark.encryption
 # TODO: remove this fails_on_rgw when I fix it
 @pytest.mark.fails_on_rgw
+@pytest.mark.s3d_unsupported
 def test_encryption_sse_c_multipart_invalid_chunks_2():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -11903,6 +11949,7 @@ def test_encryption_sse_c_multipart_invalid_chunks_2():
     assert status == 400
 
 @pytest.mark.encryption
+@pytest.mark.s3d_unsupported
 def test_encryption_sse_c_multipart_bad_download():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -12563,6 +12610,7 @@ def test_bucket_policy_acl():
 
 @pytest.mark.bucket_policy
 @pytest.mark.list_objects_v2
+@pytest.mark.s3d_unsupported
 def test_bucketv2_policy_acl():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -12598,6 +12646,7 @@ def test_bucketv2_policy_acl():
     client.put_bucket_acl(Bucket=bucket_name, ACL='public-read')
 
 @pytest.mark.bucket_policy
+@pytest.mark.s3d_unsupported
 def test_bucket_policy_different_tenant():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -12630,6 +12679,7 @@ def test_bucket_policy_different_tenant():
     assert len(response['Contents']) == 1
 
 @pytest.mark.bucket_policy
+@pytest.mark.s3d_unsupported
 def test_bucket_policy_multipart():
     client = get_client()
     alt_client = get_alt_client()
@@ -12664,6 +12714,7 @@ def test_bucket_policy_multipart():
     alt_client.create_multipart_upload(Bucket=bucket_name, Key=key)
 
 @pytest.mark.bucket_policy
+@pytest.mark.s3d_unsupported
 def test_bucket_policy_tenanted_bucket():
     tenant_client = get_tenant_client()
     bucket_name = get_new_bucket(tenant_client)
@@ -12775,6 +12826,7 @@ def test_bucketv2_policy_another_bucket():
 @pytest.mark.bucket_policy
 # TODO: remove this fails_on_rgw when I fix it
 @pytest.mark.fails_on_rgw
+@pytest.mark.s3d_unsupported
 def test_bucket_policy_set_condition_operator_end_with_IfExists():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -12880,6 +12932,7 @@ def _make_random_string(size):
     return ''.join(random.choice(string.ascii_letters) for _ in range(size))
 
 @pytest.mark.tagging
+@pytest.mark.s3d_unsupported
 def test_set_multipart_tagging():
   bucket_name = get_new_bucket()
   client = get_client()
@@ -13577,6 +13630,7 @@ def test_bucket_policy_upload_part_copy():
 @pytest.mark.tagging
 @pytest.mark.bucket_policy
 @pytest.mark.fails_on_dbstore
+@pytest.mark.s3d_unsupported
 def test_bucket_policy_put_obj_copy_source():
     bucket_name = _create_objects(keys=['public/foo', 'public/bar', 'private/foo'])
     client = get_client()
@@ -13624,6 +13678,7 @@ def test_bucket_policy_put_obj_copy_source():
 @pytest.mark.tagging
 @pytest.mark.bucket_policy
 @pytest.mark.fails_on_dbstore
+@pytest.mark.s3d_unsupported
 def test_bucket_policy_put_obj_copy_source_meta():
     src_bucket_name = _create_objects(keys=['public/foo', 'public/bar'])
     client = get_client()
@@ -13714,6 +13769,7 @@ def test_bucket_policy_put_obj_acl():
 
 
 @pytest.mark.bucket_policy
+@pytest.mark.s3d_unsupported
 def test_bucket_policy_put_obj_grant():
 
     bucket_name = get_new_bucket()
@@ -14951,6 +15007,7 @@ def test_copy_object_ifnonematch_failed():
 
 # TODO: results in a 404 instead of 400 on the RGW
 @pytest.mark.fails_on_rgw
+@pytest.mark.s3d_unsupported
 def test_object_read_unreadable():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -15092,6 +15149,7 @@ def test_bucket_policy_allow_notprincipal():
     assert error_code == 'InvalidArgument' or error_code == 'MalformedPolicy'
 
 
+@pytest.mark.s3d_unsupported
 def test_get_undefined_public_block():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -15109,6 +15167,7 @@ def test_get_undefined_public_block():
 
     assert response_code == 'NoSuchPublicAccessBlockConfiguration'
 
+@pytest.mark.s3d_unsupported
 def test_get_public_block_deny_bucket_policy():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -15137,6 +15196,7 @@ def test_get_public_block_deny_bucket_policy():
     status, error_code = _get_status_and_error_code(e.response)
     assert status == 403
 
+@pytest.mark.s3d_unsupported
 def test_put_public_block():
     #client = get_svc_client(svc='s3control', client_config=Config(s3={'addressing_style': 'path'}))
     bucket_name = get_new_bucket()
@@ -15213,6 +15273,7 @@ def test_block_public_object_canned_acls():
     client.put_object(Bucket=bucket_name, Key='foo4', Body='', ACL='private')
 
 
+@pytest.mark.s3d_unsupported
 def test_block_public_policy():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -15230,6 +15291,7 @@ def test_block_public_policy():
     check_access_denied(client.put_bucket_policy, Bucket=bucket_name, Policy=policy_document)
 
 
+@pytest.mark.s3d_unsupported
 def test_block_public_policy_with_principal():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -15248,6 +15310,7 @@ def test_block_public_policy_with_principal():
 
 
 @pytest.mark.fails_on_dbstore
+@pytest.mark.s3d_unsupported
 def test_block_public_restrict_public_buckets():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -15314,6 +15377,7 @@ def test_ignore_public_acls():
     check_access_denied(alt_client.list_objects, Bucket=bucket_name)
     check_access_denied(alt_client.get_object, Bucket=bucket_name, Key='key1')
 
+@pytest.mark.s3d_unsupported
 def test_put_get_delete_public_block():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -15776,6 +15840,7 @@ def test_sse_s3_default_method_head():
 @pytest.mark.bucket_encryption
 @pytest.mark.sse_s3
 @pytest.mark.fails_on_dbstore
+@pytest.mark.s3d_unsupported
 def test_sse_s3_default_multipart_upload():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -16020,6 +16085,7 @@ def test_object_checksum_sha512():
     assert error_code == 'BadDigest'
 
 @pytest.mark.checksum
+@pytest.mark.s3d_unsupported
 def test_object_checksum_xxhash3():
     bucket = get_new_bucket()
     client = get_client()
@@ -16042,6 +16108,7 @@ def test_object_checksum_xxhash3():
     assert error_code == 'BadDigest'
 
 @pytest.mark.checksum
+@pytest.mark.s3d_unsupported
 def test_object_checksum_xxhash64():
     bucket = get_new_bucket()
     client = get_client()
@@ -16064,6 +16131,7 @@ def test_object_checksum_xxhash64():
     assert error_code == 'BadDigest'
 
 @pytest.mark.checksum
+@pytest.mark.s3d_unsupported
 def test_object_checksum_xxhash128():
     bucket = get_new_bucket()
     client = get_client()
@@ -16131,6 +16199,7 @@ def test_object_checksum_crc64nvme():
 
 @pytest.mark.checksum
 @pytest.mark.fails_on_dbstore
+@pytest.mark.s3d_unsupported
 def test_multipart_checksum_sha256():
     bucket = get_new_bucket()
     client = get_client()
@@ -16305,6 +16374,7 @@ def multipart_checksum_3parts_helper(key=None, checksum_algo=None, checksum_type
 
 @pytest.mark.checksum
 @pytest.mark.fails_on_dbstore
+@pytest.mark.s3d_unsupported
 def test_multipart_use_cksum_helper_sha256():
     size = 5 * 1024 * 1024 # each part but the last must be at least 5M
 
@@ -16329,6 +16399,7 @@ def test_multipart_use_cksum_helper_sha256():
 
 @pytest.mark.checksum
 @pytest.mark.fails_on_dbstore
+@pytest.mark.s3d_unsupported
 def test_multipart_use_cksum_helper_crc64nvme():
     size = 5 * 1024 * 1024 # each part but the last must be at least 5M
 
@@ -16353,6 +16424,7 @@ def test_multipart_use_cksum_helper_crc64nvme():
 
 @pytest.mark.checksum
 @pytest.mark.fails_on_dbstore
+@pytest.mark.s3d_unsupported
 def test_multipart_use_cksum_helper_crc32():
     size = 5 * 1024 * 1024 # each part but the last must be at least 5M
 
@@ -16377,6 +16449,7 @@ def test_multipart_use_cksum_helper_crc32():
 
 @pytest.mark.checksum
 @pytest.mark.fails_on_dbstore
+@pytest.mark.s3d_unsupported
 def test_multipart_use_cksum_helper_crc32c():
     size = 5 * 1024 * 1024 # each part but the last must be at least 5M
 
@@ -16401,6 +16474,7 @@ def test_multipart_use_cksum_helper_crc32c():
 
 @pytest.mark.checksum
 @pytest.mark.fails_on_dbstore
+@pytest.mark.s3d_unsupported
 def test_multipart_use_cksum_helper_sha1():
     size = 5 * 1024 * 1024 # each part but the last must be at least 5M
 
@@ -18669,6 +18743,7 @@ def _bucket_logging_delete_objects(versioned):
 @pytest.mark.bucket_logging
 @pytest.mark.fails_on_aws
 @pytest.mark.fails_without_logging_rollover
+@pytest.mark.s3d_unsupported
 def test_bucket_logging_delete_objects():
     _bucket_logging_delete_objects(False)
 
@@ -18676,6 +18751,7 @@ def test_bucket_logging_delete_objects():
 @pytest.mark.bucket_logging
 @pytest.mark.fails_on_aws
 @pytest.mark.fails_without_logging_rollover
+@pytest.mark.s3d_unsupported
 def test_bucket_logging_delete_objects_versioned():
     _bucket_logging_delete_objects(True)
 
@@ -20319,6 +20395,7 @@ def check_parts_count(parts, expected):
 
 @pytest.mark.checksum
 @pytest.mark.fails_on_dbstore
+@pytest.mark.s3d_unsupported
 def test_get_multipart_checksum_object_attributes():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -20362,6 +20439,7 @@ def test_get_multipart_checksum_object_attributes():
         partno += 1
 
 @pytest.mark.fails_on_dbstore
+@pytest.mark.s3d_unsupported
 def test_get_multipart_object_attributes():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -20398,6 +20476,7 @@ def test_get_multipart_object_attributes():
         partno += 1
 
 @pytest.mark.fails_on_dbstore
+@pytest.mark.s3d_unsupported
 def test_get_paginated_multipart_object_attributes():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -20459,6 +20538,7 @@ def test_get_paginated_multipart_object_attributes():
         partno += 1
 
 @pytest.mark.fails_on_dbstore
+@pytest.mark.s3d_unsupported
 def test_get_single_multipart_object_attributes():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -20491,6 +20571,7 @@ def test_get_single_multipart_object_attributes():
     assert obj_part['Size'] == part_size
     assert 'ChecksumSHA256' not in obj_part
 
+@pytest.mark.s3d_unsupported
 def test_get_checksum_object_attributes():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -20515,6 +20596,7 @@ def test_get_checksum_object_attributes():
     assert 'ObjectParts' not in response
 
 @pytest.mark.versioning
+@pytest.mark.s3d_unsupported
 def test_get_versioned_object_attributes():
     bucket_name = get_new_bucket()
     check_configure_versioning_retry(bucket_name, "Enabled", "Enabled")
@@ -20594,6 +20676,7 @@ def test_get_sse_c_encrypted_object_attributes():
     assert 'ObjectParts' not in response
 
 @pytest.mark.fails_on_dbstore
+@pytest.mark.s3d_unsupported
 def test_get_object_attributes():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -20618,7 +20701,6 @@ def test_get_object_attributes():
 
 
 def test_upload_part_copy_percent_encoded_key():
-    
     s3_client = get_client()
     bucket_name = get_new_bucket()
     key = "anyfile.txt"
@@ -21482,6 +21564,284 @@ def test_delete_objects_version_if_match_size():
     response = client.delete_objects(Bucket=bucket, Delete={'Objects': [{'Key': key, 'VersionId': version, 'Size': badsize}]})
     assert 200 == response['ResponseMetadata']['HTTPStatusCode']
 
+@pytest.mark.conditional_write
+@pytest.mark.fails_on_dbstore
+def test_copy_object_if_none_match_dest():
+    client = get_client()
+    bucket = get_new_bucket(client)
+    src = 'src'
+    dst = 'dst'
+    copy_source = bucket + '/' + src
+
+    client.put_object(Bucket=bucket, Key=src, Body='source')
+
+    # the destination does not exist yet, so the wildcard is satisfied
+    client.copy_object(Bucket=bucket, Key=dst, CopySource=copy_source, IfNoneMatch='*')
+    etag = client.head_object(Bucket=bucket, Key=dst)['ETag']
+
+    # the destination exists now, so the wildcard and the current etag both fail
+    e = assert_raises(ClientError, client.copy_object, Bucket=bucket, Key=dst, CopySource=copy_source, IfNoneMatch='*')
+    assert (412, 'PreconditionFailed') == _get_status_and_error_code(e.response)
+    e = assert_raises(ClientError, client.copy_object, Bucket=bucket, Key=dst, CopySource=copy_source, IfNoneMatch=etag)
+    assert (412, 'PreconditionFailed') == _get_status_and_error_code(e.response)
+
+    # an etag that does not match the destination is satisfied
+    response = client.copy_object(Bucket=bucket, Key=dst, CopySource=copy_source, IfNoneMatch='badetag')
+    assert 200 == response['ResponseMetadata']['HTTPStatusCode']
+
+@pytest.mark.conditional_write
+@pytest.mark.fails_on_dbstore
+def test_copy_object_if_match_dest():
+    client = get_client()
+    bucket = get_new_bucket(client)
+    src = 'src'
+    dst = 'dst'
+    copy_source = bucket + '/' + src
+
+    client.put_object(Bucket=bucket, Key=src, Body='source')
+
+    # If-Match cannot be satisfied while the destination is absent
+    e = assert_raises(ClientError, client.copy_object, Bucket=bucket, Key=dst, CopySource=copy_source, IfMatch='*')
+    assert (404, 'NoSuchKey') == _get_status_and_error_code(e.response)
+    e = assert_raises(ClientError, client.copy_object, Bucket=bucket, Key=dst, CopySource=copy_source, IfMatch='badetag')
+    assert (404, 'NoSuchKey') == _get_status_and_error_code(e.response)
+
+    client.put_object(Bucket=bucket, Key=dst, Body='destination')
+    etag = client.head_object(Bucket=bucket, Key=dst)['ETag']
+
+    e = assert_raises(ClientError, client.copy_object, Bucket=bucket, Key=dst, CopySource=copy_source, IfMatch='badetag')
+    assert (412, 'PreconditionFailed') == _get_status_and_error_code(e.response)
+
+    response = client.copy_object(Bucket=bucket, Key=dst, CopySource=copy_source, IfMatch=etag)
+    assert 200 == response['ResponseMetadata']['HTTPStatusCode']
+
+    response = client.copy_object(Bucket=bucket, Key=dst, CopySource=copy_source, IfMatch='*')
+    assert 200 == response['ResponseMetadata']['HTTPStatusCode']
+
+@pytest.mark.conditional_write
+@pytest.mark.fails_on_dbstore
+def test_copy_object_current_if_none_match_dest():
+    client = get_client()
+    bucket = get_new_bucket(client)
+    check_configure_versioning_retry(bucket, "Enabled", "Enabled")
+    src = 'src'
+    dst = 'dst'
+    copy_source = bucket + '/' + src
+
+    client.put_object(Bucket=bucket, Key=src, Body='source')
+    client.put_object(Bucket=bucket, Key=dst, Body='destination')
+
+    e = assert_raises(ClientError, client.copy_object, Bucket=bucket, Key=dst, CopySource=copy_source, IfNoneMatch='*')
+    assert (412, 'PreconditionFailed') == _get_status_and_error_code(e.response)
+
+    # a delete marker becomes the current version, so the destination reads as absent
+    client.delete_object(Bucket=bucket, Key=dst)
+
+    response = client.copy_object(Bucket=bucket, Key=dst, CopySource=copy_source, IfNoneMatch='*')
+    assert 200 == response['ResponseMetadata']['HTTPStatusCode']
+
+@pytest.mark.conditional_write
+@pytest.mark.fails_on_dbstore
+def test_copy_object_current_if_match_dest_delete_marker():
+    client = get_client()
+    bucket = get_new_bucket(client)
+    check_configure_versioning_retry(bucket, "Enabled", "Enabled")
+    src = 'src'
+    dst = 'dst'
+    copy_source = bucket + '/' + src
+
+    client.put_object(Bucket=bucket, Key=src, Body='source')
+    etag = client.put_object(Bucket=bucket, Key=dst, Body='destination')['ETag']
+
+    # the etag of a version hidden behind a delete marker must not satisfy If-Match
+    client.delete_object(Bucket=bucket, Key=dst)
+
+    e = assert_raises(ClientError, client.copy_object, Bucket=bucket, Key=dst, CopySource=copy_source, IfMatch=etag)
+    assert (404, 'NoSuchKey') == _get_status_and_error_code(e.response)
+    e = assert_raises(ClientError, client.copy_object, Bucket=bucket, Key=dst, CopySource=copy_source, IfMatch='*')
+    assert (404, 'NoSuchKey') == _get_status_and_error_code(e.response)
+
+@pytest.mark.conditional_write
+@pytest.mark.fails_on_dbstore
+def test_multipart_copy_source_if_match():
+    client = get_client()
+    src_bucket = get_new_bucket(client)
+    dst_bucket = get_new_bucket(client)
+    src_key = 'src'
+    dst_key = 'dst'
+    copy_source = src_bucket + '/' + src_key
+
+    body = 'source data'
+    etag = client.put_object(Bucket=src_bucket, Key=src_key, Body=body)['ETag']
+
+    upload_id = client.create_multipart_upload(Bucket=dst_bucket, Key=dst_key)['UploadId']
+
+    e = assert_raises(ClientError, client.upload_part_copy, Bucket=dst_bucket, Key=dst_key,
+        PartNumber=1, UploadId=upload_id, CopySource=copy_source, CopySourceIfMatch='badetag')
+    assert (412, 'PreconditionFailed') == _get_status_and_error_code(e.response)
+
+    e = assert_raises(ClientError, client.upload_part_copy, Bucket=dst_bucket, Key=dst_key,
+        PartNumber=1, UploadId=upload_id, CopySource=copy_source, CopySourceIfNoneMatch=etag)
+    assert (412, 'PreconditionFailed') == _get_status_and_error_code(e.response)
+
+    response = client.upload_part_copy(Bucket=dst_bucket, Key=dst_key, PartNumber=1,
+        UploadId=upload_id, CopySource=copy_source, CopySourceIfMatch=etag)
+    parts = [{'ETag': response['CopyPartResult']['ETag'].strip('"'), 'PartNumber': 1}]
+
+    client.complete_multipart_upload(Bucket=dst_bucket, Key=dst_key, UploadId=upload_id,
+        MultipartUpload={'Parts': parts})
+    assert body == _get_body(client.get_object(Bucket=dst_bucket, Key=dst_key))
+
+@pytest.mark.conditional_write
+@pytest.mark.fails_on_dbstore
+def test_multipart_copy_source_if_modified_since():
+    client = get_client()
+    src_bucket = get_new_bucket(client)
+    dst_bucket = get_new_bucket(client)
+    src_key = 'src'
+    dst_key = 'dst'
+    copy_source = src_bucket + '/' + src_key
+
+    body = 'source data'
+    client.put_object(Bucket=src_bucket, Key=src_key, Body=body)
+    last_modified = client.head_object(Bucket=src_bucket, Key=src_key)['LastModified']
+
+    past = last_modified - datetime.timedelta(minutes=5)
+    future = last_modified + datetime.timedelta(minutes=5)
+
+    upload_id = client.create_multipart_upload(Bucket=dst_bucket, Key=dst_key)['UploadId']
+
+    # the source was modified after 'past', so If-Unmodified-Since is not satisfied
+    e = assert_raises(ClientError, client.upload_part_copy, Bucket=dst_bucket, Key=dst_key,
+        PartNumber=1, UploadId=upload_id, CopySource=copy_source, CopySourceIfUnmodifiedSince=past)
+    assert (412, 'PreconditionFailed') == _get_status_and_error_code(e.response)
+
+    # the source was not modified after 'future', so If-Modified-Since is not satisfied.
+    # a copy source reports this as 412 rather than the 304 a read would return
+    e = assert_raises(ClientError, client.upload_part_copy, Bucket=dst_bucket, Key=dst_key,
+        PartNumber=1, UploadId=upload_id, CopySource=copy_source, CopySourceIfModifiedSince=future)
+    assert (412, 'PreconditionFailed') == _get_status_and_error_code(e.response)
+
+    response = client.upload_part_copy(Bucket=dst_bucket, Key=dst_key, PartNumber=1,
+        UploadId=upload_id, CopySource=copy_source, CopySourceIfUnmodifiedSince=future)
+    parts = [{'ETag': response['CopyPartResult']['ETag'].strip('"'), 'PartNumber': 1}]
+
+    client.complete_multipart_upload(Bucket=dst_bucket, Key=dst_key, UploadId=upload_id,
+        MultipartUpload={'Parts': parts})
+    assert body == _get_body(client.get_object(Bucket=dst_bucket, Key=dst_key))
+
+@pytest.mark.conditional_write
+@pytest.mark.fails_on_dbstore
+@pytest.mark.fails_on_aws # a list of etags is RFC 7232, but S3 only documents a single etag
+def test_put_object_if_match_etag_list():
+    client = get_client()
+    bucket = get_new_bucket(client)
+    key = 'obj'
+
+    etag = client.put_object(Bucket=bucket, Key=key, Body='data')['ETag']
+
+    # a list holding the current etag is satisfied
+    response = client.put_object(Bucket=bucket, Key=key, Body='data2', IfMatch='"badetag", ' + etag)
+    assert 200 == response['ResponseMetadata']['HTTPStatusCode']
+
+    # a list without it is not
+    e = assert_raises(ClientError, client.put_object, Bucket=bucket, Key=key, Body='data3',
+        IfMatch='"badetag", "otheretag"')
+    assert (412, 'PreconditionFailed') == _get_status_and_error_code(e.response)
+
+@pytest.mark.conditional_write
+@pytest.mark.fails_on_dbstore
+def test_copy_object_source_version_if_match():
+    client = get_client()
+    bucket = get_new_bucket(client)
+    check_configure_versioning_retry(bucket, "Enabled", "Enabled")
+    src = 'src'
+    dst = 'dst'
+
+    first = client.put_object(Bucket=bucket, Key=src, Body='first')
+    second = client.put_object(Bucket=bucket, Key=src, Body='second')
+
+    old_source = {'Bucket': bucket, 'Key': src, 'VersionId': first['VersionId']}
+
+    # the precondition is evaluated against the addressed version, not the current one
+    e = assert_raises(ClientError, client.copy_object, Bucket=bucket, Key=dst,
+        CopySource=old_source, CopySourceIfMatch=second['ETag'])
+    assert (412, 'PreconditionFailed') == _get_status_and_error_code(e.response)
+
+    client.copy_object(Bucket=bucket, Key=dst, CopySource=old_source, CopySourceIfMatch=first['ETag'])
+    assert 'first' == _get_body(client.get_object(Bucket=bucket, Key=dst))
+
+@pytest.mark.fails_on_dbstore
+def test_copy_object_source_delete_marker_version():
+    client = get_client()
+    bucket = get_new_bucket(client)
+    check_configure_versioning_retry(bucket, "Enabled", "Enabled")
+    src = 'src'
+    dst = 'dst'
+
+    client.put_object(Bucket=bucket, Key=src, Body='source')
+    marker = client.delete_object(Bucket=bucket, Key=src)
+
+    # the current version is a delete marker, so the source reads as absent
+    e = assert_raises(ClientError, client.copy_object, Bucket=bucket, Key=dst, CopySource=bucket + '/' + src)
+    assert (404, 'NoSuchKey') == _get_status_and_error_code(e.response)
+
+    # addressing the delete marker directly is a bad request instead
+    e = assert_raises(ClientError, client.copy_object, Bucket=bucket, Key=dst,
+        CopySource={'Bucket': bucket, 'Key': src, 'VersionId': marker['VersionId']})
+    assert (400, 'InvalidRequest') == _get_status_and_error_code(e.response)
+
+@pytest.mark.conditional_write
+@pytest.mark.fails_on_dbstore
+def test_multipart_copy_source_range_if_match():
+    client = get_client()
+    src_bucket = get_new_bucket(client)
+    dst_bucket = get_new_bucket(client)
+    src_key = 'src'
+    dst_key = 'dst'
+    copy_source = src_bucket + '/' + src_key
+
+    # a range copy is only allowed when the source is larger than 5MB
+    body = 'abcdefghij' + 'x' * (6*1024*1024)
+    etag = client.put_object(Bucket=src_bucket, Key=src_key, Body=body)['ETag']
+
+    upload_id = client.create_multipart_upload(Bucket=dst_bucket, Key=dst_key)['UploadId']
+
+    # a failed precondition must be reported before the range is applied
+    e = assert_raises(ClientError, client.upload_part_copy, Bucket=dst_bucket, Key=dst_key,
+        PartNumber=1, UploadId=upload_id, CopySource=copy_source,
+        CopySourceRange='bytes=2-5', CopySourceIfMatch='badetag')
+    assert (412, 'PreconditionFailed') == _get_status_and_error_code(e.response)
+
+    response = client.upload_part_copy(Bucket=dst_bucket, Key=dst_key, PartNumber=1,
+        UploadId=upload_id, CopySource=copy_source,
+        CopySourceRange='bytes=2-5', CopySourceIfMatch=etag)
+    parts = [{'ETag': response['CopyPartResult']['ETag'].strip('"'), 'PartNumber': 1}]
+
+    client.complete_multipart_upload(Bucket=dst_bucket, Key=dst_key, UploadId=upload_id,
+        MultipartUpload={'Parts': parts})
+    assert 'cdef' == _get_body(client.get_object(Bucket=dst_bucket, Key=dst_key))
+
+@pytest.mark.conditional_write
+@pytest.mark.fails_on_dbstore
+def test_copy_object_replace_self_if_match():
+    client = get_client()
+    bucket = get_new_bucket(client)
+    key = 'obj'
+    copy_source = bucket + '/' + key
+
+    etag = client.put_object(Bucket=bucket, Key=key, Body='data')['ETag']
+
+    # a self copy carries both the source and the destination preconditions
+    e = assert_raises(ClientError, client.copy_object, Bucket=bucket, Key=key, CopySource=copy_source,
+        MetadataDirective='REPLACE', IfMatch='badetag')
+    assert (412, 'PreconditionFailed') == _get_status_and_error_code(e.response)
+
+    response = client.copy_object(Bucket=bucket, Key=key, CopySource=copy_source,
+        MetadataDirective='REPLACE', IfMatch=etag)
+    assert 200 == response['ResponseMetadata']['HTTPStatusCode']
+    assert 'data' == _get_body(client.get_object(Bucket=bucket, Key=key))
+
 def public_bucket_policy(bucket):
     return json.dumps({
         "Version": "2012-10-17",
@@ -21728,6 +22088,7 @@ def test_bucket_create_delete_bucket_ownership():
 
     client.delete_bucket_ownership_controls(Bucket=bucket)
 
+@pytest.mark.s3d_unsupported
 def test_head_object_404_with_policy_prefix():
     client = get_client()
     bucket = get_new_bucket(client)
