@@ -3570,7 +3570,6 @@ def test_object_raw_authenticated():
     response = client.get_object(Bucket=bucket_name, Key='foo')
     assert response['ResponseMetadata']['HTTPStatusCode'] == 200
 
-@pytest.mark.s3d_unsupported
 def test_object_raw_response_headers():
     bucket_name = _setup_bucket_object_acl('private', 'private')
 
@@ -13063,7 +13062,6 @@ def _make_random_string(size):
     return ''.join(random.choice(string.ascii_letters) for _ in range(size))
 
 @pytest.mark.tagging
-@pytest.mark.s3d_unsupported
 def test_set_multipart_tagging():
   bucket_name = get_new_bucket()
   client = get_client()
