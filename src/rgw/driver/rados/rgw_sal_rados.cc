@@ -63,6 +63,7 @@
 #include "rgw_sal.h"
 #include "rgw_sal_rados.h"
 #ifdef WITH_RADOSGW_LANCEDB
+#include "rgw_rest_vector_bucket.h"
 #include "rgw_s3vector.h"
 #include "rgw_s3vector_background.h"
 #endif
@@ -2860,6 +2861,9 @@ void RadosStore::register_admin_apis(RGWRESTMgr* mgr)
 {
   mgr->register_resource("user", new RGWRESTMgr_User);
   mgr->register_resource("bucket", new RGWRESTMgr_Bucket);
+#ifdef WITH_RADOSGW_LANCEDB
+  mgr->register_resource("vectorbucket", new RGWRESTMgr_VectorBucket);
+#endif
   /*Registering resource for /admin/metadata */
   mgr->register_resource("metadata", new RGWRESTMgr_Metadata);
   mgr->register_resource("log", new RGWRESTMgr_Log);
@@ -4102,6 +4106,8 @@ int RadosObject::copy_object(const ACLOwner& owner,
 				bool high_precision_time,
 				const char* if_match,
 				const char* if_nomatch,
+				const char* dest_if_match,
+				const char* dest_if_nomatch,
 				AttrsMod attrs_mod,
 				bool copy_if_newer,
 				Attrs& attrs,
@@ -4135,6 +4141,8 @@ int RadosObject::copy_object(const ACLOwner& owner,
 				     high_precision_time,
 				     if_match,
 				     if_nomatch,
+				     dest_if_match,
+				     dest_if_nomatch,
 				     static_cast<RGWRados::AttrsMod>(attrs_mod),
 				     copy_if_newer,
 				     attrs,

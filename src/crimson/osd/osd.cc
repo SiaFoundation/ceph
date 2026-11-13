@@ -887,6 +887,7 @@ seastar::future<> OSD::start_asok_admin()
     asok->register_command(make_asok_hook<SendBeaconHook>(*this));
     asok->register_command(make_asok_hook<RunOSDBenchHook>(*this));
     asok->register_command(make_asok_hook<FlushPgStatsHook>(*this));
+    asok->register_command(make_asok_hook<GetLatestOSDMapHook>(*this));
     asok->register_command(
       make_asok_hook<DumpPGStateHistory>(std::as_const(pg_shard_manager)));
     asok->register_command(make_asok_hook<DumpMetricsHook>());
@@ -1037,6 +1038,9 @@ OSD::do_ms_dispatch(
     return handle_osd_map(boost::static_pointer_cast<MOSDMap>(m));
   case CEPH_MSG_OSD_OP:
     return handle_osd_op(conn, boost::static_pointer_cast<MOSDOp>(m));
+  case CEPH_MSG_PING:
+    // clients ping connections with laggy ops, only to detect their reset
+    return seastar::now();
   case MSG_OSD_PG_CREATE2:
     return handle_pg_create(
       conn, boost::static_pointer_cast<MOSDPGCreate2>(m));
@@ -1074,6 +1078,8 @@ OSD::do_ms_dispatch(
   case MSG_OSD_BACKFILL_RESERVE:
     [[fallthrough]];
   case MSG_OSD_RECOVERY_RESERVE:
+    [[fallthrough]];
+  case MSG_OSD_POOLMIGRATION_RESERVE:
     [[fallthrough]];
   case MSG_OSD_PG_LOG:
     return handle_peering_op(conn, boost::static_pointer_cast<MOSDPeeringOp>(m));
@@ -1259,6 +1265,18 @@ seastar::future<uint64_t> OSD::send_pg_stats()
   // mgr client sends the report message in background
   mgrc->report();
   co_return osd_stat.seq;
+}
+
+seastar::future<epoch_t> OSD::wait_for_latest_osdmap()
+{
+  LOG_PREFIX(OSD::wait_for_latest_osdmap);
+  ceph_assert(seastar::this_shard_id() == PRIMARY_CORE);
+  const auto [newest, oldest] = co_await monc->get_version("osdmap");
+  DEBUG("newest osdmap: {}, mine: {}", newest, osdmap->get_epoch());
+  // the OSD-level gate is updated only after all PGs have advanced
+  co_return co_await
+    get_shard_services().local_state.osdmap_gate.wait_for_map_untracked(
+      newest, &get_shard_services());
 }
 
 seastar::future<> OSD::handle_osd_map(Ref<MOSDMap> m)

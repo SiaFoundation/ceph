@@ -170,6 +170,7 @@ if(WITH_RADOSGW_LANCEDB)
   list(APPEND librgw_common_srcs
     rgw_sal_wrapper.cc
     rgw_rest_s3vector.cc
+    rgw_rest_vector_bucket.cc
     rgw_s3vector.cc
     rgw_s3vector_filter.cc
     rgw_s3vector_background.cc)
@@ -858,7 +859,7 @@ if(WITH_RADOSGW_FDB)
  add_library(rgw_fdb INTERFACE)
 
  target_link_libraries(rgw_fdb INTERFACE
-  -lfdb_c
+  FoundationDB::FoundationDB
   -lm
   -lrt
  )
@@ -866,21 +867,8 @@ if(WITH_RADOSGW_FDB)
  target_compile_options(rgw_fdb INTERFACE
    -pthread)
 
-#JFW: this is where the FDB client library packages install
-#fdb_c headers-- we need to find a smarter way to handle this
-#end of it before libfdb can be non-experimental:
- target_include_directories(rgw_fdb INTERFACE
-  /usr/include/foundationdb)
-
- target_include_directories(rgw_common PRIVATE
-  /usr/include/foundationdb
-  "${CMAKE_SOURCE_DIR}/src/rgw")
-
- target_link_libraries(rgw_common PRIVATE
+ target_link_libraries(rgw_common PUBLIC
   rgw_fdb)
-
- target_include_directories(radosgw PRIVATE
-  /usr/include/foundationdb)
 
  # Use the zpp_bits back-end for serialization:
  add_library(zpp_bits INTERFACE)
