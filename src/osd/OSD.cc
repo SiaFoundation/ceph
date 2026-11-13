@@ -93,6 +93,7 @@
 #include "messages/MOSDBoot.h"
 #include "messages/MOSDPGTemp.h"
 #include "messages/MOSDPGReadyToMerge.h"
+#include "messages/MOSDPGMigratedPool.h"
 
 #include "messages/MOSDMap.h"
 #include "messages/MMonGetOSDMap.h"
@@ -2078,6 +2079,18 @@ void OSDService::prune_sent_ready_to_merge(const OSDMapRef& osdmap)
 
 // ---
 
+void OSDService::send_pg_migrated_pool(std::optional<int64_t> migration_target, pg_t pgid)
+{
+  dout(20) << __func__
+	   << " send_pg_migrated_pool " << pgid << dendl;
+  ceph_assert(migration_target.has_value());
+  monc->send_mon_message(new MOSDPGMigratedPool(osdmap->get_epoch(),
+						*migration_target,
+						pgid));
+}
+
+// ---
+
 void OSDService::_queue_for_recovery(
   pg_awaiting_throttle_t p,
   uint64_t reserved_pushes)
@@ -2994,7 +3007,9 @@ will start to track new ops received afterwards.";
     service.get_scrub_services().dump_scrub_reservations(f);
     f->close_section();
   } else if (prefix == "get_latest_osdmap") {
-    get_latest_osdmap();
+    const epoch_t epoch = get_latest_osdmap();
+    Formatter::ObjectSection os{*f, "osdmap"};
+    f->dump_unsigned("epoch", epoch);
   } else if (prefix == "set_heap_property") {
     string property;
     int64_t value = 0;
@@ -7745,6 +7760,7 @@ void OSD::ms_fast_dispatch(Message *m)
   case MSG_OSD_PG_INFO2:
   case MSG_OSD_BACKFILL_RESERVE:
   case MSG_OSD_RECOVERY_RESERVE:
+  case MSG_OSD_POOLMIGRATION_RESERVE:
   case MSG_OSD_PG_LEASE:
   case MSG_OSD_PG_LEASE_ACK:
     {
@@ -10070,17 +10086,20 @@ void OSD::dequeue_peering_evt(
       derr << __func__ << " unrecognized pg-less event " << evt->get_desc() << dendl;
       ceph_abort();
     }
-  } else if (PeeringCtx rctx;
-	     advance_pg(curmap->get_epoch(), pg, handle, rctx)) {
-    pg->do_peering_event(evt, rctx);
-    if (pg->is_deleted()) {
+  } else {
+    PeeringCtx rctx;
+    rctx.handle = &handle;
+    if (advance_pg(curmap->get_epoch(), pg, handle, rctx)) {
+      pg->do_peering_event(evt, rctx);
+      if (pg->is_deleted()) {
+	pg->unlock();
+	return;
+      }
+      dispatch_context(rctx, pg, curmap, &handle);
+      need_up_thru = pg->get_need_up_thru();
+      same_interval_since = pg->get_same_interval_since();
       pg->unlock();
-      return;
     }
-    dispatch_context(rctx, pg, curmap, &handle);
-    need_up_thru = pg->get_need_up_thru();
-    same_interval_since = pg->get_same_interval_since();
-    pg->unlock();
   }
 
   if (need_up_thru) {
@@ -10616,14 +10635,17 @@ void OSD::check_config()
 
 // --------------------------------
 
-void OSD::get_latest_osdmap()
+epoch_t OSD::get_latest_osdmap()
 {
-  dout(10) << __func__ << " -- start" << dendl;
+  dout(10) << fmt::format("{} -- start", __func__) << dendl;
 
   boost::system::error_code ec;
   service.objecter->wait_for_latest_osdmap(ceph::async::use_blocked[ec]);
+  const epoch_t epoch =
+    service.objecter->with_osdmap(std::mem_fn(&OSDMap::get_epoch));
 
-  dout(10) << __func__ << " -- finish" << dendl;
+  dout(10) << fmt::format("{} -- finish (epoch {})", __func__, epoch) << dendl;
+  return epoch;
 }
 
 // --------------------------------

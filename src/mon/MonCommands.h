@@ -1157,7 +1157,8 @@ COMMAND("osd pool force-remove-snap "
 	"osd", "rw")
 COMMAND("osd pool ls "
 	"name=detail,type=CephChoices,strings=detail,req=false "
-	"name=show_rule_names,type=CephBool,req=false",
+	"name=show_rule_names,type=CephBool,req=false "
+	"name=show_all,type=CephBool,req=false",
 	"list pools (with `detail` and --show-rule-names, render the "
 	"CRUSH rule by name in the text output, and add a "
 	"`crush_rule_name` field to the JSON output)", "osd", "r")
@@ -1178,8 +1179,29 @@ COMMAND("osd pool create "
 	"name=target_size_ratio,type=CephFloat,range=0.0,req=false "
 	"name=force_pg_limit,type=CephBool,req=false "
 	"name=yes_i_really_mean_it,type=CephBool,req=false "
-	"name=crimson,type=CephBool,req=false",
+	"name=crimson,type=CephBool,req=false "
+	"name=enable_ec_optimizations,type=CephBool,req=false ",
 	"create pool", "osd", "rw")
+COMMAND("osd pool migrate "
+	"name=pool,type=CephPoolname "
+	"name=pg_num,type=CephInt,range=0,req=false "
+	"name=pgp_num,type=CephInt,range=0,req=false "
+	"name=pool_type,type=CephChoices,strings=replicated|erasure,req=false "
+	"name=erasure_code_profile,type=CephString,req=false,goodchars=[A-Za-z0-9-_.] "
+	"name=rule,type=CephString,req=false "
+	"name=expected_num_objects,type=CephInt,range=0,req=false "
+	"name=size,type=CephInt,range=0,req=false "
+	"name=pg_num_min,type=CephInt,range=0,req=false "
+	"name=pg_num_max,type=CephInt,range=0,req=false "
+	"name=autoscale_mode,type=CephChoices,strings=on|off|warn,req=false "
+	"name=bulk,type=CephBool,req=false "
+	"name=target_size_bytes,type=CephInt,range=0,req=false "
+	"name=target_size_ratio,type=CephFloat,range=0.0,req=false "
+	"name=force_pg_limit,type=CephBool,req=false "
+	"name=yes_i_really_mean_it,type=CephBool,req=false "
+	"name=crimson,type=CephBool,req=false "
+	"name=enable_ec_optimizations,type=CephBool,req=false ",
+	"migrate pool to a new pool while keeping the same name", "osd", "rw")
 COMMAND_WITH_FLAG("osd pool delete "
 	"name=pool,type=CephPoolname "
 	"name=pool2,type=CephPoolname,req=false "
@@ -1622,9 +1644,13 @@ COMMAND("nvme-gw listeners"
 
 COMMAND("nvme-gw ok-to-stop"
 	" name=pool,type=CephString"
-	" name=group,type=CephString",
-	" returns true if it is possible to stop one of gateways within (pool, group)",
-	"mon", "r")
+	" name=group,type=CephString"
+	" name=id,type=CephString,req=false"
+	" name=disable-if-ok,type=CephBool,req=false",
+	" check whether one gateway in (pool, group) may stop."
+	" id - optional; when set, the check applies to this gateway"
+	" disable-if-ok - true/false, requires id; admin-disable that gateway if checks pass",
+	"mgr", "rw")
 
 COMMAND("nvme-gw enable"
    " name=id,type=CephString"

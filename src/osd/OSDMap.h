@@ -1253,6 +1253,31 @@ public:
   bool have_pg_pool(int64_t p) const {
     return pools.count(p);
   }
+  /// true if pool is current target, covering in-progress and complete migration
+  bool is_pool_migration_target(int64_t pid) const {
+    const pg_pool_t *p = get_pg_pool(pid);
+    return p && p->migration_root.has_value();
+  }
+  /// gets original root source pool from the current target
+  int64_t get_pool_migration_root_from_target(int64_t pid) const {
+    const pg_pool_t *p = get_pg_pool(pid);
+    return (p && p->migration_root) ? *p->migration_root : -1;
+  }
+  /// gets original root source pool from any pool in the chain
+  int64_t get_pool_migration_root(int64_t pid) const {
+    const pg_pool_t *p = get_pg_pool(pid);
+    if (!p)
+      return -1;
+    if (p->migration_root) // this is current target, get root
+      return *p->migration_root;
+    if (p->migration_target) { // this is a source stub, get root from our target
+      const pg_pool_t *tip = get_pg_pool(*p->migration_target);
+      if (tip && tip->migration_root)
+        return *tip->migration_root;
+    }
+    return -1;
+  }
+
   const pg_pool_t* get_pg_pool(int64_t p) const {
     auto i = pools.find(p);
     if (i != pools.end())
@@ -1632,7 +1657,7 @@ public:
   void print_osd(int id, std::ostream& out) const;
   void print_osds(std::ostream& out) const;
   void print_pools(CephContext *cct, std::ostream& out,
-                   bool show_rule_names = false) const;
+                   bool show_rule_names = false, bool show_all = false) const;
   void print_summary(ceph::Formatter *f, std::ostream& out,
 		     const std::string& prefix, bool extra=false) const;
   void print_oneline_summary(std::ostream& out) const;
@@ -1658,10 +1683,12 @@ public:
   static void dump_erasure_code_profiles(
     const mempool::osdmap::map<std::string,std::map<std::string,std::string> > &profiles,
     ceph::Formatter *f);
-  void dump(ceph::Formatter *f, CephContext *cct = nullptr) const;
+  void dump(ceph::Formatter *f, CephContext *cct = nullptr,
+	    bool with_read_balance = true) const;
   void dump_osd(int id, ceph::Formatter *f) const;
   void dump_osds(ceph::Formatter *f) const;
-  void dump_pool(CephContext *cct, int64_t pid, const pg_pool_t &pdata, ceph::Formatter *f) const;
+  void dump_pool(CephContext *cct, int64_t pid, const pg_pool_t &pdata, ceph::Formatter *f,
+		 bool with_read_balance) const;
   void dump_read_balance_score(CephContext *cct, int64_t pid, const pg_pool_t &pdata, ceph::Formatter *f) const;
   static std::list<OSDMap> generate_test_instances();
   bool check_new_blocklist_entries() const { return new_blocklist_entries; }

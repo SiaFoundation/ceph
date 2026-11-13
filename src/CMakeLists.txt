@@ -1,5 +1,6 @@
 include(GetGitRevisionDescription)
 include(CheckCXXCompilerFlag)
+include(CheckLinkerFlag)
 
 # for erasure and compressor plugins
 set(CEPH_INSTALL_PKGLIBDIR ${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME})
@@ -195,6 +196,11 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     string(APPEND CMAKE_SHARED_LINKER_FLAGS " -undefined dynamic_lookup")
   endif()
 endif(CMAKE_CXX_COMPILER_ID STREQUAL GNU)
+
+# --copy-dt-needed-entries is a GNU ld option; lld, Apple's ld64 and
+# lld in MinGW mode reject it. Test the linker instead of the OS or
+# the compiler, since clang on Linux uses GNU ld by default.
+check_linker_flag(CXX "-Wl,--copy-dt-needed-entries" HAVE_LINK_COPY_DT_NEEDED_ENTRIES)
 
 if(WITH_CEPH_DEBUG_MUTEX)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-DCEPH_DEBUG_MUTEX>)
@@ -451,14 +457,16 @@ else()
 endif()
 
 # in osd/PeeringState.h, the number of elements in PeeringState::Active::reactions
-# is now 21 which exceeds the default value of BOOST_MPL_LIMIT_VECTOR_SIZE, which
-# is 20. so we need to override it. see
+# now exceeds the default value of BOOST_MPL_LIMIT_LIST_SIZE, which is 20, so we
+# override it. The limit must be a multiple of 10, and
+# BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS forces the preprocessor to regenerate the
+# mpl::list machinery for the requested size. see
 # https://www.boost.org/doc/libs/1_74_0/libs/mpl/doc/refmanual/limit-list-size.html
 # link with this library, if your code includes osd/PeeringState.h (indirectly)
 add_library(Boost::MPL INTERFACE IMPORTED)
 set_target_properties(Boost::MPL PROPERTIES
   INTERFACE_COMPILE_DEFINITIONS
-    "BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS;BOOST_MPL_LIMIT_LIST_SIZE=30")
+    "BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS;BOOST_MPL_LIMIT_LIST_SIZE=40")
 
 if(WITH_CRIMSON)
   find_package(c-ares 1.13.0 QUIET)
@@ -481,11 +489,12 @@ if(WITH_CRIMSON)
     set(Seastar_SANITIZE "OFF" CACHE STRING "" FORCE)
   endif()
   if(Seastar_DPDK)
-    find_package(DPDK QUIET)
-    if(NOT DPDK_FOUND)
-      include(BuildDPDK)
-      build_dpdk(${CMAKE_BINARY_DIR}/src/dpdk)
+    if(WITH_CRIMSON_SPDK OR WITH_SPDK)
+      message(FATAL_ERROR "Seastar_DPDK cannot be enabled together with SPDK: "
+        "SPDK links its own bundled DPDK. "
+        "Set WITH_CRIMSON_SPDK=OFF and WITH_SPDK=OFF")
     endif()
+    find_package(DPDK REQUIRED)
   endif()
   set(old_BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS})
   if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
