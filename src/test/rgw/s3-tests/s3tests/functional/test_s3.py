@@ -16567,7 +16567,6 @@ def test_object_checksum_crc64nvme():
 
 @pytest.mark.checksum
 @pytest.mark.fails_on_dbstore
-@pytest.mark.s3d_unsupported
 def test_multipart_checksum_sha256():
     bucket = get_new_bucket()
     client = get_client()
@@ -16742,7 +16741,6 @@ def multipart_checksum_3parts_helper(key=None, checksum_algo=None, checksum_type
 
 @pytest.mark.checksum
 @pytest.mark.fails_on_dbstore
-@pytest.mark.s3d_unsupported
 def test_multipart_use_cksum_helper_sha256():
     size = 5 * 1024 * 1024 # each part but the last must be at least 5M
 
@@ -16767,7 +16765,6 @@ def test_multipart_use_cksum_helper_sha256():
 
 @pytest.mark.checksum
 @pytest.mark.fails_on_dbstore
-@pytest.mark.s3d_unsupported
 def test_multipart_use_cksum_helper_crc64nvme():
     size = 5 * 1024 * 1024 # each part but the last must be at least 5M
 
@@ -16792,7 +16789,6 @@ def test_multipart_use_cksum_helper_crc64nvme():
 
 @pytest.mark.checksum
 @pytest.mark.fails_on_dbstore
-@pytest.mark.s3d_unsupported
 def test_multipart_use_cksum_helper_crc32():
     size = 5 * 1024 * 1024 # each part but the last must be at least 5M
 
@@ -16817,7 +16813,6 @@ def test_multipart_use_cksum_helper_crc32():
 
 @pytest.mark.checksum
 @pytest.mark.fails_on_dbstore
-@pytest.mark.s3d_unsupported
 def test_multipart_use_cksum_helper_crc32c():
     size = 5 * 1024 * 1024 # each part but the last must be at least 5M
 
@@ -16842,7 +16837,6 @@ def test_multipart_use_cksum_helper_crc32c():
 
 @pytest.mark.checksum
 @pytest.mark.fails_on_dbstore
-@pytest.mark.s3d_unsupported
 def test_multipart_use_cksum_helper_sha1():
     size = 5 * 1024 * 1024 # each part but the last must be at least 5M
 
@@ -20775,7 +20769,6 @@ def check_parts_count(parts, expected):
 
 @pytest.mark.checksum
 @pytest.mark.fails_on_dbstore
-@pytest.mark.s3d_unsupported
 def test_get_multipart_checksum_object_attributes():
     bucket_name = get_new_bucket()
     client = get_client()
@@ -20951,7 +20944,6 @@ def test_get_single_multipart_object_attributes():
     assert obj_part['Size'] == part_size
     assert 'ChecksumSHA256' not in obj_part
 
-@pytest.mark.s3d_unsupported
 def test_get_checksum_object_attributes():
     bucket_name = get_new_bucket()
     client = get_client()
