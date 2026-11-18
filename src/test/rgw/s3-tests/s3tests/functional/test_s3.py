@@ -20968,7 +20968,6 @@ def test_get_checksum_object_attributes():
     assert 'ObjectParts' not in response
 
 @pytest.mark.versioning
-@pytest.mark.s3d_unsupported
 def test_get_versioned_object_attributes():
     bucket_name = get_new_bucket()
     check_configure_versioning_retry(bucket_name, "Enabled", "Enabled")
@@ -21048,7 +21047,6 @@ def test_get_sse_c_encrypted_object_attributes():
     assert 'ObjectParts' not in response
 
 @pytest.mark.fails_on_dbstore
-@pytest.mark.s3d_unsupported
 def test_get_object_attributes():
     bucket_name = get_new_bucket()
     client = get_client()
